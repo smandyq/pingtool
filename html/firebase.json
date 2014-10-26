@@ -1,0 +1,9 @@
+{
+  "firebase": "pingtool",
+  "public": ".",
+  "ignore": [
+    "firebase.json",
+    "**/.*",
+    "**/node_modules/**"
+  ]
+}
