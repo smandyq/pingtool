@@ -1,6 +1,7 @@
 #!/bin/bash
 
 host=$(tracepath google.com -b -m 2 | grep '^ 2\:.*' | sed 's/.*(\([0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\)).*/\1/')
+
 localhost=$(hostname)
 
 hlocalhost=${localhost//'.'/'-'}

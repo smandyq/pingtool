@@ -9,55 +9,94 @@
     google.load('visualization', '1.0', {'packages':['corechart']});
     google.setOnLoadCallback(setup);
     
+    //load firebase api
+    var myfb = new Firebase("https://pingtool.firebaseio.com");
+    
+    //create global google variables.  assign them later.
+    var ldt;
+    var hdt;
+    var lchart;
+    var hchart;
+    
+    //define chart options
+    var options = {'title':'Ping time vs timestamp',
+     'width':1024,
+     'height':768};
+    
     function setup()
     {
-    
-      //load firebase api
-      var myfb = new Firebase("https://pingtool.firebaseio.com");
-      
-      console.log("loaded");
       
       //call drawChart when firebase gets new data
-      myfb.child("pings").on('value', drawChart);
+      myfb.child("pings").on('value', populateSelect);
       //myfb.child("pings").on('child_added', drawChart);
 
       //setup all of our global chart stuff.      
-      var ldt = new google.visualization.DataTable();
-      var hdt = new google.visualization.DataTable();
+      ldt = new google.visualization.DataTable();
+      hdt = new google.visualization.DataTable();
       ldt.addColumn('datetime', 'Timestamp');
       ldt.addColumn('number', 'Ping_Time');
       
       hdt.addColumn('string', 'Timestamp');
       hdt.addColumn('number', 'Ping_Time');
-      
-      var options = {'title':'Ping time vs timestamp',
-             'width':1024,
-             'height':768};
                      
       // Instantiate and draw our chart, passing in some options.
-      var lchart = new google.visualization.ScatterChart(document.getElementById('lchart'));
-      var hchart = new google.visualization.Histogram(document.getElementById('hchart'));
-        
-      function drawChart(data)
+      lchart = new google.visualization.ScatterChart(document.getElementById('lchart'));
+      hchart = new google.visualization.Histogram(document.getElementById('hchart'));
+    }
+    
+    function populateSelect(data)
+    { 
+      //console.log(data.val());
+      data.forEach(function(origin)
       {
-        
-        //console.log(data.val());
-        data.forEach(function(row)
+        var fs = document.getElementById('fromselect');
+        var ts = document.getElementById('toselect');
+        fs.options = []
+        ts.options = []
+        var option = document.createElement("option");
+        option.text = origin.name();
+        fs.add(option)
+        origin.forEach(function(remote)
         {
-          //console.log(row.val());
-          ldt.addRow([new Date(row.val().timestamp*1000), row.val().ping_time])
-          hdt.addRow([Date(row.val().timestamp*1000), row.val().ping_time])
+          var option = document.createElement("option");
+          option.text = remote.name();
+          ts.add(option)
         })
-        lchart.draw(ldt, options);
-        hchart.draw(hdt, options);
-      }
+        fs.addEventListener("change", updateListener);
+        ts.addEventListener("change", updateListener);
+      })
+      updateListener();
+    }
+    
+    function updateListener()
+    {
+      var fs = document.getElementById('fromselect');
+      var ts = document.getElementById('toselect');
+      var listento = "pings/" + fs.value + "/" + ts.value;
+      ldt.removeRows(0, ldt.getNumberOfRows());
+      hdt.removeRows(0, hdt.getNumberOfRows());
+      myfb.child(listento).on('value', drawChart);
+    }
+    
+    function drawChart(data)
+    {
+      data.forEach(function(row)
+      {
+        //console.log(row.val());
+        ldt.addRow([new Date(row.val().timestamp*1000), row.val().ping_time])
+        hdt.addRow([Date(row.val().timestamp*1000), row.val().ping_time])
+      })
+      lchart.draw(ldt, options);
+      hchart.draw(hdt, options);
     }
     </script>
   </head>
   <body>
-    <div id="lchart" style="width: 100%; height: 50%;" >
+    <select id="fromselect"></select>
+    <select id="toselect"></select>
+    <div id="lchart">
     </div>
-    <div id="hchart" style="width: 100%; height: 50%;" >
+    <div id="hchart">
     </div>
   </body>
 </html>
