@@ -19,48 +19,45 @@
       
       //call drawChart when firebase gets new data
       myfb.child("pings").on('value', drawChart);
+      //myfb.child("pings").on('child_added', drawChart);
+
+      //setup all of our global chart stuff.      
+      var ldt = new google.visualization.DataTable();
+      var hdt = new google.visualization.DataTable();
+      ldt.addColumn('datetime', 'Timestamp');
+      ldt.addColumn('number', 'Ping_Time');
+      
+      hdt.addColumn('string', 'Timestamp');
+      hdt.addColumn('number', 'Ping_Time');
+      
+      var options = {'title':'Ping time vs timestamp',
+             'width':1024,
+             'height':768};
+                     
+      // Instantiate and draw our chart, passing in some options.
+      var lchart = new google.visualization.ScatterChart(document.getElementById('lchart'));
+      var hchart = new google.visualization.Histogram(document.getElementById('hchart'));
         
       function drawChart(data)
       {
-        var ldt = new google.visualization.DataTable();
-        var hdt = new google.visualization.DataTable();
-        ldt.addColumn('datetime', 'Timestamp');
-        ldt.addColumn('number', 'Ping_Time');
-        
-        hdt.addColumn('string', 'Timestamp');
-        hdt.addColumn('number', 'Ping_Time');
         
         //console.log(data.val());
         data.forEach(function(row)
         {
           //console.log(row.val());
-          ldt.addRow([new Date(row.val().timestamp), row.val().ping_time])
-          hdt.addRow([Date(row.val().timestamp), row.val().ping_time])
+          ldt.addRow([new Date(row.val().timestamp*1000), row.val().ping_time])
+          hdt.addRow([Date(row.val().timestamp*1000), row.val().ping_time])
         })
-        
-
-        var options = {'title':'Ping time vs timestamp',
-                       'width':1024,
-                       'height':768,
-                       'vAxis':{'logScale': true}};
-                       
-        // Instantiate and draw our chart, passing in some options.
-        var lchart = new google.visualization.LineChart(document.getElementById('lchart'));
-        var hchart = new google.visualization.Histogram(document.getElementById('hchart'));
         lchart.draw(ldt, options);
         hchart.draw(hdt, options);
-                       
-
-
-
       }
     }
     </script>
   </head>
   <body>
-    <div id="lchart" style="width: 100%; height: *;" >
+    <div id="lchart" style="width: 100%; height: 50%;" >
     </div>
-    <div id="hchart" style="width: 100%; height: *;" >
+    <div id="hchart" style="width: 100%; height: 50%;" >
     </div>
   </body>
 </html>
