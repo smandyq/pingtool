@@ -51,16 +51,24 @@
       {
         var fs = document.getElementById('fromselect');
         var ts = document.getElementById('toselect');
-        fs.options = []
-        ts.options = []
         var option = document.createElement("option");
         option.text = origin.name();
-        fs.add(option)
+        option.id = origin.name();
+        if(fs.options.namedItem(origin.name())===null)
+        {
+          console.log("adding " + origin.name());
+          fs.add(option)
+        }
         origin.forEach(function(remote)
         {
           var option = document.createElement("option");
           option.text = remote.name();
-          ts.add(option)
+          option.id = remote.name();
+          if(!ts.options.namedItem(remote.name()))
+          {
+            console.log("adding " + remote.name());
+            ts.add(option)
+          }
         })
         fs.addEventListener("change", updateListener);
         ts.addEventListener("change", updateListener);
